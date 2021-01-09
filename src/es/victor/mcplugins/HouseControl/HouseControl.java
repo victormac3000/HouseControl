@@ -2,8 +2,7 @@ package es.victor.mcplugins.HouseControl;
 
 import org.bukkit.entity.Player;
 
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 
 public class HouseControl {
@@ -52,17 +51,18 @@ public class HouseControl {
         return isPlayer;
     }
 
-    public void newPlayer(String name) throws HouseControlException {
+    public void newPlayer(String name) throws HouseControlException,SQLException {
         String username = player.getDisplayName();
 
-        String sql = "INSERT (ID,USERNAME,NAME) INTO Players VALUES (null, " + username + "," + name + ")";
-        ResultSet rs;
         try {
-            Statement stmt = this.db.getConnection().createStatement();
-            rs = stmt.executeQuery(sql);
-            System.out.println(sql);
-        } catch (Exception e) {
-            throw new HouseControlException(e.getMessage());
+            String query = "INSERT INTO Players (ID, USERNAME, NAME)" + " VALUES (?, ?, ?)";
+            PreparedStatement preparedStmt = this.db.getConnection().prepareStatement(query);
+            preparedStmt.setString (1, null);
+            preparedStmt.setString (2, username);
+            preparedStmt.setString   (3, name);
+            preparedStmt.execute();
+        } catch (SQLIntegrityConstraintViolationException e) {
+            throw new HouseControlException("You have already registered in the house system! :)");
         }
     }
 }

@@ -6,6 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.security.spec.ECField;
+import java.sql.SQLException;
 
 public class HouseRouter implements CommandExecutor {
     Messages cliMsg = new Messages(true);
@@ -18,6 +19,7 @@ public class HouseRouter implements CommandExecutor {
             // Is a player
             playerMsg = new Messages(player);
             HouseControl house = new HouseControl(player);
+
 
             // No args
             if (args.length == 0) {
@@ -39,25 +41,35 @@ public class HouseRouter implements CommandExecutor {
                 }
 
             }
-
-            if (args.length == 1) {
+            // System.out.println();
+            if (args.length > 0) {
                 if (args[0].equals("register")) {
                     // Check that name exists
+                    StringBuffer nameBuffer = new StringBuffer();
                     String name;
                     try {
-                        name = args[1];
-                    } catch (Exception e) {
+                        for (int i=1; i < args.length; i++) {
+                            if (i>1) {
+                                nameBuffer.append(" " + args[i]);
+                            } else {
+                                nameBuffer.append(args[i]);
+                            }
+                        }
+                        name = nameBuffer.toString();
+                        house.newPlayer(name);
+                    } catch (IndexOutOfBoundsException e) {
                         playerMsg.inputError();
                         return false;
-                    }
-                    try {
-                        house.newPlayer(name);
                     } catch (HouseControlException e) {
                         cliMsg.serverError(e.getMessage());
-                        playerMsg.serverError("");
+                        playerMsg.serverErrorForPlayer(e.getMessage());
                         return false;
+                    } catch (Exception e) {
+                        cliMsg.serverError(e.getMessage());
+                        playerMsg.serverError("");
                     }
                     playerMsg.sendMessage("You now must select a new name for your home");
+                    return true;
                 }
             }
         } catch (Exception e) {

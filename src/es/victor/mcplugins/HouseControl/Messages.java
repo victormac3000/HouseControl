@@ -80,6 +80,14 @@ public class Messages {
         }
     }
 
+    public void serverErrorForPlayer(String serverError) {
+        if (!this.cli) {
+            this.sendMessage(serverError);
+        } else {
+            System.out.println(serverError);
+        }
+    }
+
     public void inputError() {
         this.sendMessage("Check your spelling, that command is not good","warn_friendly");
     }
