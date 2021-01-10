@@ -31,6 +31,8 @@ public class Messages {
             case "warn_friendly":
                 this.player.sendMessage(ChatColor.YELLOW + msg);
                 break;
+            case "success":
+                this.player.sendMessage(ChatColor.GREEN + msg);
             case "info":
                 this.player.sendMessage(ChatColor.DARK_BLUE + msg);
                 break;

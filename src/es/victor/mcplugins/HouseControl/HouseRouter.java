@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 
 import java.security.spec.ECField;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 
 public class HouseRouter implements CommandExecutor {
     Messages cliMsg = new Messages(true);
@@ -60,7 +61,7 @@ public class HouseRouter implements CommandExecutor {
                     } catch (IndexOutOfBoundsException e) {
                         playerMsg.inputError();
                         return false;
-                    } catch (HouseControlException e) {
+                    } catch (SQLIntegrityConstraintViolationException e) {
                         cliMsg.serverError(e.getMessage());
                         playerMsg.serverErrorForPlayer(e.getMessage());
                         return false;
@@ -70,6 +71,31 @@ public class HouseRouter implements CommandExecutor {
                     }
                     playerMsg.sendMessage("You now must select a new name for your home");
                     return true;
+                }
+                if (args[0].equals("new")) {
+                    StringBuffer nameBuffer = new StringBuffer();
+                    String name;
+                    try {
+                        for (int i=1; i < args.length; i++) {
+                            if (i>1) {
+                                nameBuffer.append(" " + args[i]);
+                            } else {
+                                nameBuffer.append(args[i]);
+                            }
+                        }
+                        name = nameBuffer.toString();
+                        house.newHouse(name);
+                        playerMsg.sendMessage("The house " + name + " has been created succesfully", "success");
+                        playerMsg.sendMessage("Now " + name + " is your default home");
+                        return true;
+                    } catch (IndexOutOfBoundsException e) {
+                        playerMsg.inputError();
+                        return false;
+                    } catch (Exception e) {
+                        cliMsg.serverError(e.getMessage());
+                        playerMsg.serverError("");
+                        return false;
+                    }
                 }
             }
         } catch (Exception e) {

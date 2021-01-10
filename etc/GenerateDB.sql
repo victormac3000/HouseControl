@@ -14,3 +14,5 @@ CREATE TABLE IF NOT EXISTS Players(
     NAME varchar(255) NOT NULL,
     PRIMARY KEY (ID,USERNAME)
 );
+INSERT INTO Players (ID,USERNAME,NAME) VALUES (0,"admin","Administrator");
+INSERT INTO House (ID,HOUSENAME,NAME,LOCATION,OWNERS) VALUES (0,"adminHouse","Administrator's house","5,5,5","0");

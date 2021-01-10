@@ -51,18 +51,53 @@ public class HouseControl {
         return isPlayer;
     }
 
-    public void newPlayer(String name) throws HouseControlException,SQLException {
+    public void newPlayer(String name) throws SQLException {
         String username = player.getDisplayName();
 
-        try {
-            String query = "INSERT INTO Players (ID, USERNAME, NAME)" + " VALUES (?, ?, ?)";
-            PreparedStatement preparedStmt = this.db.getConnection().prepareStatement(query);
-            preparedStmt.setString (1, null);
-            preparedStmt.setString (2, username);
-            preparedStmt.setString   (3, name);
-            preparedStmt.execute();
-        } catch (SQLIntegrityConstraintViolationException e) {
-            throw new HouseControlException("You have already registered in the house system! :)");
-        }
+        String query = "INSERT INTO Players (ID, USERNAME, NAME)" + " VALUES (?, ?, ?)";
+        PreparedStatement preparedStmt = this.db.getConnection().prepareStatement(query);
+        preparedStmt.setString (1, null);
+        preparedStmt.setString (2, username);
+        preparedStmt.setString (3, name);
+        preparedStmt.execute();
+    }
+
+    public void newHouse(String name) throws SQLException {
+        String username = player.getDisplayName();
+
+        // Get last ID of house
+        Statement statementIdHouse = this.db.getConnection().createStatement();
+        ResultSet resultSetIdHouse = statementIdHouse.executeQuery("SELECT ID FROM House ORDER BY ID DESC LIMIT 1");
+        resultSetIdHouse.next();
+        int count = resultSetIdHouse.getInt("ID") + 1;
+        resultSetIdHouse.close();
+
+        // Get last ID of the player
+        Statement statementIdPlayer = this.db.getConnection().createStatement();
+        ResultSet resultSetIdPlayer = statementIdPlayer.executeQuery("SELECT ID FROM Players WHERE USERNAME = '" + username + "'");
+        resultSetIdPlayer.next();
+        int id_player = resultSetIdPlayer.getInt("ID") + 1;
+        resultSetIdPlayer.close();
+
+
+        String houseName = username + "_House_" + count;
+        String location = player.getLocation().getX() + "," + player.getLocation().getY() + "," + player.getLocation().getZ();
+        String owners = "" + count;
+
+        String query = "INSERT INTO House (ID, HOUSENAME, NAME, LOCATION, OWNERS)" + " VALUES (?, ?, ?, ?, ?)";
+        PreparedStatement preparedStmt = this.db.getConnection().prepareStatement(query);
+        preparedStmt.setString (1, null);
+        preparedStmt.setString (2, houseName);
+        preparedStmt.setString (3, name);
+        preparedStmt.setString (4, location);
+        preparedStmt.setString (5, owners);
+        preparedStmt.execute();
+
+
+        String queryDefault = "UPDATE Players SET DEFAULT = ? WHERE USERNAME = ?)";
+        PreparedStatement preparedStmtDefault = this.db.getConnection().prepareStatement(queryDefault);
+        preparedStmt.setInt (1, id_player);
+        preparedStmt.setString (2, "'" + username + "'");
+        preparedStmt.execute();
     }
 }
