@@ -1,6 +1,7 @@
 package es.victor.mcplugins.HouseControl;
 
 import java.sql.*;
+import java.util.Arrays;
 
 public class Db {
     final String username = "mcuser";
@@ -17,35 +18,24 @@ public class Db {
         try {
             Class.forName("com.mysql.jdbc.Driver");
         } catch (ClassNotFoundException e) {
-            throw new DbException("JDBC driver error!\n" + e.getStackTrace());
+            throw new DbException("JDBC driver error!\n" + Arrays.toString(e.getStackTrace()));
         }
         String sql = "USE " + database + ";";
         try {
-            this.connection = DriverManager.getConnection(url,username,password);
+            connection = DriverManager.getConnection(url,username,password);
         } catch (SQLException e) {
             throw new DbException("SQL error!\n" + e.getMessage());
         }
 
         try {
-            PreparedStatement stmt = this.connection.prepareStatement(sql);
-            ResultSet results = stmt.executeQuery();
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.executeQuery();
         } catch (Exception e) {
             throw new DbException("SQL error!\n" + e.getMessage());
         }
     }
 
-    public void close() {
-        try {
-            if (connection!=null && !connection.isClosed()) {
-                connection.close();
-            }
-        } catch(Exception e) {
-            System.out.println("Error closing the connection");
-            e.printStackTrace();
-        }
-    }
-
     public Connection getConnection() {
-        return this.connection;
+        return connection;
     }
 }

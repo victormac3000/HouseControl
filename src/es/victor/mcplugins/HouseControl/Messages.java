@@ -7,7 +7,7 @@ public class Messages {
     Player player;
     boolean cli = false;
 
-    public Messages(Boolean noPlayer) {
+    public Messages() {
         this.cli = true;
     }
 
@@ -55,23 +55,31 @@ public class Messages {
 
     public void introduce() {
         if (!this.cli) {
-            this.player.sendMessage("Hello, let me introduce ourselves, " + this.player.getDisplayName());
+            this.sendMessage("Hello, let me introduce ourselves, " + this.player.getDisplayName());
+            this.sendMessage("To get started in the house control plugin, type /house help");
         } else {
-            System.out.println("A brand new player has connected to the server");
+            System.out.println("New user: " + player.getDisplayName());
         }
     }
 
-    public void houseInfo() {
-        this.sendMessage("To create a house write the command below", "info");
-        this.sendMessage("/house houseUsername houseName Xcoordinate Ycoordinate Zcoordinate", "data");
-        this.sendMessage("Example: /house victor356 Victor's House -85 58 157", "data_example");
-    }
-
-    public void regiserInfo() {
-        this.sendMessage("Welcome to the house plugin!", "info");
-        this.sendMessage("To get started type the following command:", "info");
-        this.sendMessage("/house register yourName", "data");
-        this.sendMessage("Example: /house register Víctor", "data_example");
+    public void help() {
+        this.sendMessage("Welcome to the house plugin");
+        this.sendMessage("\n\n");
+        this.sendMessage("/house register: Register in the system");
+        this.sendMessage("Example: /house register username");
+        this.sendMessage("Replace username with wathever you want!");
+        this.sendMessage("\n");
+        this.sendMessage("/house new: Create a new house");
+        this.sendMessage("Example: /house new HouseName 5");
+        this.sendMessage("YOU MUST BE IN THE CENTER OF YOUR HOUSE");
+        this.sendMessage("Replace HouseName with wathever you want!");
+        this.sendMessage("Replace 5 with the number of blocks around you that is the house boundaries");
+        this.sendMessage("\n");
+        this.sendMessage("/house status: Register in the system");
+        this.sendMessage("Example: /house status");
+        this.sendMessage("This will show the status of your default house");
+        this.sendMessage("Example: /house status HouseName");
+        this.sendMessage("This will show the status of the house specified");
     }
 
     public void serverError(String serverError) {
@@ -91,7 +99,7 @@ public class Messages {
     }
 
     public void inputError() {
-        this.sendMessage("Check your spelling, that command is not good","warn_friendly");
+        this.sendMessage("Check your spelling, that command is not good", "warn_friendly");
     }
 
 

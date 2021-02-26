@@ -5,13 +5,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Objects;
+
 public class MainHouseControl extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         // OnPlayerJoin Listener
         getServer().getPluginManager().registerEvents(this,this);
         // Command listeners
-        this.getCommand("house").setExecutor(new HouseRouter());
+        Objects.requireNonNull(this.getCommand("house")).setExecutor(new HouseRouter());
     }
 
     @Override
