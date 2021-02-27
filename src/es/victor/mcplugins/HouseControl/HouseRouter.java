@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.ArrayList;
 
 public class HouseRouter implements CommandExecutor {
     Messages cliMsg = new Messages();
@@ -30,25 +31,42 @@ public class HouseRouter implements CommandExecutor {
 
         // No args
         if (args.length == 0) {
-            // Make a book
-            ItemStack book = new ItemStack(Material.WRITTEN_BOOK, 1);
-            BookMeta bm = (BookMeta)book.getItemMeta();
-            if (bm == null) {
-                cliMsg.serverError("Book Meta Null pointer exception");
-                playerMsg.serverError("");
-            }
-            assert bm != null;
-            bm.setAuthor("House Control");
+            if (house.isPlayerInDb()) {
+                if (house.playerHasHouse()) {
+                    try {
+                        ArrayList<String> defaultHouseData = house.getPlayerDefaultHouse(player);
+                        HouseUI ui = new HouseUI(defaultHouseData, player);
+                        ui.mainWindow();
+                    } catch (Exception| HouseControlException e) {
+                        playerMsg.serverError("");
+                        cliMsg.serverError(e.getMessage());
+                    }
 
-            bm.setTitle("Help");
-            String[] pages = new String[2];
-            pages[0] = "Welcome to the house plugin";
-            pages[1] = "Register in the system";
-            bm.setPages(pages);
-            book.setItemMeta(bm);
-            player.getInventory().addItem(book);
-            //Help
-            playerMsg.help();
+
+                } else {
+                    playerMsg.sendMessage("Now you need to add or join a house");
+                }
+            } else {
+                // Make a book
+                ItemStack book = new ItemStack(Material.WRITTEN_BOOK, 1);
+                BookMeta bm = (BookMeta)book.getItemMeta();
+                if (bm == null) {
+                    cliMsg.serverError("Book Meta Null pointer exception");
+                    playerMsg.serverError("");
+                }
+                assert bm != null;
+                bm.setAuthor("House Control");
+
+                bm.setTitle("Help");
+                String[] pages = new String[2];
+                pages[0] = "Welcome to the house plugin";
+                pages[1] = "Register in the system";
+                bm.setPages(pages);
+                book.setItemMeta(bm);
+                player.getInventory().addItem(book);
+                //Help
+                playerMsg.help();
+            }
         }
         if (args.length > 0) {
             if (args[0].equals("register")) {
@@ -81,7 +99,7 @@ public class HouseRouter implements CommandExecutor {
                     cliMsg.serverError(e.getMessage());
                     playerMsg.serverErrorForPlayer("There was an problem adding you to the server");
                     return false;
-                } catch (Exception | HouseControlException e) {
+                } catch (Exception e) {
                     cliMsg.serverError(e.getMessage());
                     playerMsg.serverError("There was an problem adding you to the server");
                 }

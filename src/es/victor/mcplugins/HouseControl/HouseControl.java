@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class HouseControl {
@@ -27,9 +28,9 @@ public class HouseControl {
         }
     }
 
-    public boolean isPlayerInDb() throws HouseControlException {
+    public boolean isPlayerInDb() {
         boolean isPlayer = false;
-        int count;
+        int count = 0;
 
         try {
             Statement s = this.db.getConnection().createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -38,13 +39,37 @@ public class HouseControl {
             count = r.getRow();
             r.beforeFirst();
         } catch (SQLException e) {
-            throw new HouseControlException(e.getMessage());
+            this.msg.serverError("");
+            this.climsg.serverError(e.getMessage());
         }
 
         if (count > 0) {
             isPlayer = true;
         }
         return isPlayer;
+    }
+
+    public boolean playerHasHouse() {
+        boolean hasHouse = false;
+
+        int count = 0;
+
+        try {
+            Statement s = this.db.getConnection().createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ResultSet r = s.executeQuery("SELECT * FROM Have WHERE PID = '" + player.getDisplayName() +  "'");
+            r.last();
+            count = r.getRow();
+            r.beforeFirst();
+        } catch (SQLException e) {
+            this.msg.serverError("");
+            this.climsg.serverError(e.getMessage());
+        }
+
+        if (count > 0) {
+            hasHouse = true;
+        }
+
+        return hasHouse;
     }
 
     public void newPlayer(String name) throws SQLException {
@@ -57,13 +82,12 @@ public class HouseControl {
         preparedStmt.execute();
     }
 
-
     public String newHouse() throws HouseControlException,SQLException {
         Inventory inventory = player.getInventory();
         ItemStack[] items =  inventory.getContents();
         ItemStack book;
         BookMeta bookMeta = null;
-        String name,location,boundaries;
+        String id,name,location,boundaries;
         int numberStacks = 0;
 
         for (ItemStack item : items) {
@@ -96,7 +120,7 @@ public class HouseControl {
                 location = bookMeta.getPage(2);
                 boundaries = bookMeta.getPage(3) + "/" + bookMeta.getPage(4);
                 double randomNumber = Math.random();
-                String id = name + "_" + randomNumber;
+                id = name + "_" + randomNumber;
 
                 String[] locationArray = location.split(",");
                 if (locationArray.length != 3) {
@@ -161,5 +185,37 @@ public class HouseControl {
             throw new HouseControlException("Check the name of your book");
         }
         return name;
+    }
+
+    public ArrayList<String> getPlayerDefaultHouse(Player player) throws HouseControlException {
+        ArrayList<String> result = new ArrayList<>();
+        String HID = "";
+
+        try {
+            Statement s = this.db.getConnection().createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ResultSet rs = s.executeQuery("SELECT DEFAULT_HOUSE FROM Players WHERE ID = '" + player.getDisplayName() +  "'");
+            while(rs.next()) {
+                HID  = rs.getString("DEFAULT_HOUSE");
+            }
+            rs.close();
+        } catch (SQLException e) {
+            throw new HouseControlException(e.getMessage());
+        }
+
+        try {
+            Statement s = this.db.getConnection().createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ResultSet rs = s.executeQuery("SELECT * FROM Houses WHERE ID = '" + HID +  "'");
+            while(rs.next()) {
+                result.add(rs.getString("ID"));
+                result.add(rs.getString("NAME"));
+                result.add(rs.getString("LOCATION"));
+                result.add(rs.getString("BOUNDARIES"));
+            }
+            rs.close();
+        } catch (SQLException e) {
+            throw new HouseControlException(e.getMessage());
+        }
+
+        return result;
     }
 }
